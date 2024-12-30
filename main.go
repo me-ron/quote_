@@ -1,21 +1,31 @@
-package handler
+package main
 
 import (
 	"log"
+	"net/http"
 	"quote-generator-backend/config"
 	"quote-generator-backend/controllers"
 	"quote-generator-backend/repositories"
 	"quote-generator-backend/routes"
 	"quote-generator-backend/services"
+
 	"github.com/gin-gonic/gin"
-	"net/http"
+	"github.com/joho/godotenv"
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
-	// Initialize the database connection
-	err := config.ConnectDB()
+	// Load environment variables from .env file if available
+	err := godotenv.Load()
 	if err != nil {
-		log.Println(err.Error())
+		log.Println("No .env file found. Using environment variables.")
+	}
+
+	// Initialize the database connection
+	err = config.ConnectDB()
+	if err != nil {
+		log.Printf("Error connecting to DB: %s", err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
 
 	db := config.DB
@@ -28,11 +38,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	quoteController := &controllers.QuoteController{Service: quoteService}
 	userController := &controllers.UserController{Service: userService}
 
-	// Setup the Gin router
-	app := gin.Default()
-	routes.SetupRoutes(app, quoteController, userController)
+	// Setup the Gin router and handle the request
+	router := gin.Default()
+	routes.SetupRoutes(router, quoteController, userController)
 
-	// Start serving the HTTP request with the Gin engine
-	app.ServeHTTP(w, r)
+	// Use the Gin engine to handle the request and return the response
+	router.ServeHTTP(w, r)
 }
-

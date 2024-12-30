@@ -9,26 +9,12 @@ import (
 	"quote-generator-backend/routes"
 	"quote-generator-backend/services"
 
-	//"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
-func CORSMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*") 
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Authorization")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 
-		if c.Request.Method == http.MethodOptions {
-			c.AbortWithStatus(http.StatusNoContent)
-			return
-		}
-
-		c.Next()
-	}
-}
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 	// Load environment variables from .env file if available
@@ -57,7 +43,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// Setup the Gin router and handle the request
 	router := gin.Default()
-	router.Use(CORSMiddleware())
+	router.Use(cors.New(
+	cors.Config{ 
+		AllowAllOrigins: true, 
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"}, 
+		AllowHeaders: []string{"Origin", "Content-Type", "Accept"}, 
+	}))
+	
 	routes.SetupRoutes(router, quoteController, userController)
 
 	// Use the Gin engine to handle the request and return the response

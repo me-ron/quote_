@@ -73,3 +73,15 @@ func (r *UserRepository) LoginOrCreate(username string) (primitive.ObjectID, err
 	// Return existing user's ID
 	return user.ID, nil
 }
+
+func (r *UserRepository) UpdateUserPreferences(userID primitive.ObjectID, limit int, categories []string) error {
+	filter := bson.M{"_id": userID}
+	update := bson.M{
+		"$set": bson.M{
+			"limit":      limit,
+			"categories": categories,
+		},
+	}
+	_, err := r.Collection.UpdateOne(context.TODO(), filter, update)
+	return err
+}

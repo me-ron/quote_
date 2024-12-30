@@ -1,8 +1,10 @@
 package services
 
 import (
-    "quote-generator-backend/models"
-    "quote-generator-backend/repositories"
+	"quote-generator-backend/models"
+	"quote-generator-backend/repositories"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type QuoteService struct {
@@ -18,4 +20,8 @@ func (s *QuoteService) GetQuotesByCategory(category string) ([]models.Quote, err
 
 func (s *QuoteService) GetRandomQuotes(limit int, categories ...string) ([]models.Quote, error) {
     return s.Repo.GetRandomQuotes(limit, categories...)
+}
+
+func (s *QuoteService) GetAllCategories(id ...primitive.ObjectID) ([]string, error) {
+    return s.Repo.GetAllCategories(id ...)
 }

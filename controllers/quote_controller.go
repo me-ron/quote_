@@ -75,3 +75,27 @@ func (qc *QuoteController) GetRandomQuotes(c *gin.Context) {
     c.JSON(http.StatusOK, quotes)
 }
 
+// GetCategories fetches all distinct categories, optionally filtered by userID.
+func (qc *QuoteController) GetCategories(c *gin.Context) {
+    userIDParam := c.DefaultQuery("user_id", "")
+    var userID primitive.ObjectID
+    if userIDParam == "" {
+        userID = primitive.NilObjectID
+        
+    }else{
+        objID, err := primitive.ObjectIDFromHex(userIDParam)
+        if err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_id"})
+            return
+        }
+        userID = objID
+    }
+
+    categories, err := qc.Service.GetAllCategories(userID)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, categories)
+}

@@ -5,6 +5,7 @@ import (
 	"quote-generator-backend/models"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -40,32 +41,25 @@ func (r *QuoteRepository) GetQuotesByCategory(category string) ([]models.Quote, 
 func (r *QuoteRepository) GetRandomQuotes(limit int, categories ...string) ([]models.Quote, error) {
     var quotes []models.Quote
 
-    // Build the match filter
     var matchFilter bson.M
     if len(categories) > 0 {
-        // If categories are provided, filter by category
         matchFilter = bson.M{"category": bson.M{"$in": categories}}
     }
 
-    // Create the aggregation pipeline
     pipeline := mongo.Pipeline{}
 
     if len(matchFilter) > 0 {
-        // Add the match stage if a filter was specified
         pipeline = append(pipeline, bson.D{{"$match", matchFilter}})
     }
 
-    // Add the sample stage to randomly select documents
     pipeline = append(pipeline, bson.D{{"$sample", bson.D{{"size", limit}}}})
 
-    // Run the aggregation pipeline
     cursor, err := r.Collection.Aggregate(context.TODO(), pipeline)
     if err != nil {
         return nil, err
     }
     defer cursor.Close(context.TODO())
 
-    // Decode the results
     for cursor.Next(context.TODO()) {
         var quote models.Quote
         if err := cursor.Decode(&quote); err != nil {
@@ -75,4 +69,26 @@ func (r *QuoteRepository) GetRandomQuotes(limit int, categories ...string) ([]mo
     }
 
     return quotes, nil
+}
+
+func (r *QuoteRepository) GetAllCategories(id ...primitive.ObjectID) ([]string, error) {
+    var categories []string
+
+    var filter bson.M
+    if len(id) > 0 && id[0] != primitive.NilObjectID {
+        filter = bson.M{"user_id": bson.M{"$in": id[0]}}
+    } else {
+        filter = bson.M{}
+    }
+
+    cursor, err := r.Collection.Distinct(context.TODO(), "category", filter)
+    if err != nil {
+        return nil, err
+    }
+
+    for _, category := range cursor {
+        categories = append(categories, category.(string))
+    }
+
+    return categories, nil
 }

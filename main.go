@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"os"
+	"net/http"
 	"quote-generator-backend/config"
 	"quote-generator-backend/controllers"
 	"quote-generator-backend/repositories"
@@ -10,6 +10,10 @@ import (
 	"quote-generator-backend/services"
 
 	"github.com/gin-gonic/gin"
+)
+
+var (
+	app *gin.Engine
 )
 
 func main() {
@@ -27,13 +31,13 @@ func main() {
     quoteController := &controllers.QuoteController{Service: quoteService}
     userController := &controllers.UserController{Service: userService}
 
-    r := gin.Default()
+    app = gin.New()
+	r := app.Group("/api")
+
     routes.SetupRoutes(r, quoteController, userController)
+	
+}
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080" 
-	}
-
-    r.Run("0.0.0.0:"+port)
+func Handler(w http.ResponseWriter, r *http.Request) {
+	app.ServeHTTP(w, r)
 }

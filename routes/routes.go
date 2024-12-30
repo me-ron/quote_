@@ -5,7 +5,7 @@ import (
     "quote-generator-backend/controllers"
 )
 
-func SetupRoutes(r *gin.Engine, qc *controllers.QuoteController, uc *controllers.UserController) {
+func SetupRoutes(r *gin.RouterGroup, qc *controllers.QuoteController, uc *controllers.UserController) {
     r.POST("/quotes", qc.AddQuote)
     r.GET("/quotes/:category", qc.GetQuotesByCategory)
     r.GET("/quotes/random", qc.GetRandomQuotes)

@@ -9,6 +9,7 @@ import (
 	"quote-generator-backend/routes"
 	"quote-generator-backend/services"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -40,6 +41,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// Setup the Gin router and handle the request
 	router := gin.Default()
+	router.Use(cors.Default())
 	routes.SetupRoutes(router, quoteController, userController)
 
 	// Use the Gin engine to handle the request and return the response

@@ -1,10 +1,17 @@
 {
-    "version": 2,
-    "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "main.go"
-      }
+    "trailingSlash": false,
+    "rewrites": [
+        {
+            "source": "/quotes",
+            "destination": "/quotes"
+        },
+        {
+            "source": "/login",
+            "destination": "/login"
+        },
+        {
+            "source": "/users",
+            "destination": "/users"
+        }
     ]
-  }
-  
+}

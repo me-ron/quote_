@@ -12,12 +12,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func main() {
+func Handler() *gin.Engine {
     err := config.ConnectDB()
-	if (err != nil){
-		log.Println(err.Error())
-	}
-	db := config.DB
+    if err != nil {
+        log.Println(err.Error())
+    }
+    db := config.DB
     quoteRepo := &repositories.QuoteRepository{Collection: db.Collection("quotes")}
     userRepo := &repositories.UserRepository{Collection: db.Collection("users")}
 
@@ -30,10 +30,15 @@ func main() {
     r := gin.Default()
     routes.SetupRoutes(r, quoteController, userController)
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080" 
-	}
+    return r
+}
 
-    r.Run("0.0.0.0:"+port)
+func main() {
+    port := os.Getenv("PORT")
+    if port == "" {
+        port = "8080"
+    }
+
+    r := Handler()
+    r.Run("0.0.0.0:" + port)
 }

@@ -1,8 +1,7 @@
-package main
+package handler
 
 import (
 	"log"
-	"os"
 	"quote-generator-backend/config"
 	"quote-generator-backend/controllers"
 	"quote-generator-backend/repositories"
@@ -37,10 +36,3 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	app.ServeHTTP(w, r)
 }
 
-func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-}

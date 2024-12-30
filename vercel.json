@@ -1,6 +1,6 @@
 {
-    "trailingSlash": false,
-    "rewites": [
+    "version": 2,
+    "routes": [
       {
         "src": "/(.*)",
         "dest": "main.go"

@@ -2,16 +2,8 @@
     "trailingSlash": false,
     "rewrites": [
         {
-            "source": "/quotes",
-            "destination": "/quotes"
-        },
-        {
-            "source": "/login",
-            "destination": "/login"
-        },
-        {
-            "source": "/users",
-            "destination": "/users"
+            "source": "/(.*)",
+            "destination": "/main.go"
         }
     ]
 }

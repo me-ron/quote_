@@ -1,12 +1,6 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "main.go",
-        "use": "@vercel/go"
-      }
-    ],
-    "routes": [
+    "trailingSlash": false,
+    "rewites": [
       {
         "src": "/(.*)",
         "dest": "main.go"

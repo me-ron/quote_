@@ -16,7 +16,7 @@ var (
 	app *gin.Engine
 )
 
-func init() {
+func main() {
     err := config.ConnectDB()
 	if (err != nil){
 		log.Println(err.Error())
@@ -32,9 +32,14 @@ func init() {
     userController := &controllers.UserController{Service: userService}
 
     app = gin.New()
+
 	r := app.Group("/api")
 
     routes.SetupRoutes(r, quoteController, userController)
+	er := app.Run(":8080")  // Make sure the server is running on a specified port
+	if er != nil {
+		log.Println(er.Error())
+	}
 	
 }
 

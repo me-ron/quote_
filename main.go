@@ -16,7 +16,7 @@ var (
 	app *gin.Engine
 )
 
-func main() {
+func init() {
     err := config.ConnectDB()
 	if (err != nil){
 		log.Println(err.Error())

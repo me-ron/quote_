@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"quote-generator-backend/models"
 	"quote-generator-backend/services"
-	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -39,6 +37,7 @@ func (h *QuoteController) AddQuote(c *gin.Context) {
 
 func (qc *QuoteController) GetQuotesByCategory(c *gin.Context) {
     category := c.Param("category")
+
     quotes, err := qc.Service.GetQuotesByCategory(category)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -48,25 +47,24 @@ func (qc *QuoteController) GetQuotesByCategory(c *gin.Context) {
     c.JSON(http.StatusOK, quotes)
 }
 
+
 func (qc *QuoteController) GetRandomQuotes(c *gin.Context) {
-    // Get limit from query parameters, default to 5 if not provided
-    limit := 5
-    if queryLimit := c.DefaultQuery("limit", "5"); queryLimit != "" {
-        parsedLimit, err := strconv.Atoi(queryLimit)
-        if err == nil {
-            limit = parsedLimit
+    // Get the user_id from query parameters
+    userIDStr := c.DefaultQuery("user_id", "")
+    var userID primitive.ObjectID
+    if userIDStr == "" {
+        userID = primitive.NilObjectID
+    }else{
+        var err error
+        userID, err = primitive.ObjectIDFromHex(userIDStr)
+        if err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_id"})
+            return
         }
     }
 
-    // Get categories from query parameters
-    categories := c.DefaultQuery("categories", "")
-    var categoryList []string
-    if categories != "" {
-        categoryList = strings.Split(categories, ",")
-    }
-
-    // Fetch random quotes with the limit and categories
-    quotes, err := qc.Service.GetRandomQuotes(limit, categoryList...)
+    // Fetch random quotes with the limit and categories based on the user's preferences
+    quotes, err := qc.Service.GetRandomQuotes(userID)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
@@ -74,6 +72,7 @@ func (qc *QuoteController) GetRandomQuotes(c *gin.Context) {
 
     c.JSON(http.StatusOK, quotes)
 }
+
 
 // GetCategories fetches all distinct categories, optionally filtered by userID.
 func (qc *QuoteController) GetCategories(c *gin.Context) {

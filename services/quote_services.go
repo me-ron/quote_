@@ -18,8 +18,8 @@ func (s *QuoteService) GetQuotesByCategory(category string) ([]models.Quote, err
     return s.Repo.GetQuotesByCategory(category)
 }
 
-func (s *QuoteService) GetRandomQuotes(limit int, categories ...string) ([]models.Quote, error) {
-    return s.Repo.GetRandomQuotes(limit, categories...)
+func (s *QuoteService) GetRandomQuotes(id ...primitive.ObjectID)([]models.Quote, error) {
+    return s.Repo.GetRandomQuotes(id ...)
 }
 
 func (s *QuoteService) GetAllCategories(id ...primitive.ObjectID) ([]string, error) {

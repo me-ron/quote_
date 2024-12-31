@@ -64,3 +64,32 @@ func (uc *UserController) GetFavorites(c *gin.Context) {
     c.JSON(http.StatusOK, quotes)
 }
 
+func (uc *UserController) UpdateUserPreferences(c *gin.Context) {
+    userIDStr := c.Param("user_id")
+    userID, err := primitive.ObjectIDFromHex(userIDStr)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_id"})
+        return
+    }
+
+    var preferences struct {
+        Limit      int      `json:"limit"`
+        Categories []string `json:"categories"`
+    }
+
+    if err := c.ShouldBindJSON(&preferences); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+        return
+    }
+
+    err = uc.Service.UpdateUserPreferences(userID, preferences.Limit, preferences.Categories)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to update preferences"})
+        return
+    }
+
+    c.Redirect(http.StatusTemporaryRedirect, "/quotes/random?user_id="+userID.Hex())
+
+}
+
+

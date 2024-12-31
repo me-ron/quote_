@@ -38,9 +38,34 @@ func (r *QuoteRepository) GetQuotesByCategory(category string) ([]models.Quote, 
     return quotes, nil
 }
 
-func (r *QuoteRepository) GetRandomQuotes(limit int, categories ...string) ([]models.Quote, error) {
+func (r *QuoteRepository) GetRandomQuotes(id ...primitive.ObjectID) ([]models.Quote, error) {
     var quotes []models.Quote
 
+    // Default limit and categories
+    limit := 5
+    categories := []string{}
+    
+    // If userID is provided, fetch preferences from the UserRepository
+    if len(id) > 0 && id[0] != primitive.NilObjectID {
+        userID := id[0]
+        var userPreferences struct {
+            Limit int; 
+            Categories []string
+        }
+
+        // Query the user collection for preferences
+        filter := bson.M{"_id": userID}
+
+        err := r.Collection.Database().Collection("users").FindOne(context.TODO(), filter).Decode(&userPreferences)
+        if err != nil {
+            return nil, err // If there's an error (e.g., user not found), return the error
+        }
+        
+        limit = max(userPreferences.Limit, limit)
+        categories = userPreferences.Categories
+    }
+
+    // Build the match filter for categories
     var matchFilter bson.M
     if len(categories) > 0 {
         matchFilter = bson.M{"category": bson.M{"$in": categories}}
@@ -48,18 +73,22 @@ func (r *QuoteRepository) GetRandomQuotes(limit int, categories ...string) ([]mo
 
     pipeline := mongo.Pipeline{}
 
+    // If there are categories, add the match stage to the pipeline
     if len(matchFilter) > 0 {
         pipeline = append(pipeline, bson.D{{"$match", matchFilter}})
     }
 
+    // Add the sample stage to the pipeline for random selection
     pipeline = append(pipeline, bson.D{{"$sample", bson.D{{"size", limit}}}})
 
+    // Execute the aggregation pipeline
     cursor, err := r.Collection.Aggregate(context.TODO(), pipeline)
     if err != nil {
         return nil, err
     }
     defer cursor.Close(context.TODO())
 
+    // Loop through the cursor and decode the results into the quotes slice
     for cursor.Next(context.TODO()) {
         var quote models.Quote
         if err := cursor.Decode(&quote); err != nil {

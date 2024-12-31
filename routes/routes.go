@@ -15,4 +15,5 @@ func SetupRoutes(r *gin.Engine, qc *controllers.QuoteController, uc *controllers
 	r.POST("/login", uc.LoginOrCreateUser)
     r.POST("/users/:user_id/favorites", uc.AddFavorite)
     r.GET("/users/:user_id/favorites", uc.GetFavorites)
+    r.PUT("/users/:user_id/preferences", uc.UpdateUserPreferences)
 }

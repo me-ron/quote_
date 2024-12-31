@@ -55,6 +55,6 @@ func PopulateQuotesFromFile(filePath string) {
 }
 
 func main(){
-	filePath := "D:/past/year 4 semester 1/MCP/Project/Quote_Generator/helpers/quotes.json"
+	filePath := "D:/past/year 4 semester 1/MCP/project 2.0/helpers/quotes.json"
 	PopulateQuotesFromFile(filePath)
 }

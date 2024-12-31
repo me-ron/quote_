@@ -65,31 +65,33 @@ func (uc *UserController) GetFavorites(c *gin.Context) {
 }
 
 func (uc *UserController) UpdateUserPreferences(c *gin.Context) {
+    // Parse the user ID from the URL parameter
     userIDStr := c.Param("user_id")
     userID, err := primitive.ObjectIDFromHex(userIDStr)
     if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_id"})
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_id format"})
         return
     }
 
+    // Define a struct for the preferences request body
     var preferences struct {
-        Limit      int      `json:"limit"`
+        Limit      int      `json:"limit" `
         Categories []string `json:"categories"`
     }
 
+    // Bind the incoming JSON body to the preferences struct and validate
     if err := c.ShouldBindJSON(&preferences); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload", "details": err.Error()})
         return
     }
 
+    // Call the service to update preferences
     err = uc.Service.UpdateUserPreferences(userID, preferences.Limit, preferences.Categories)
     if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to update preferences"})
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to update preferences", "details": err.Error()})
         return
     }
 
-    c.Redirect(http.StatusTemporaryRedirect, "/quotes/random?user_id="+userID.Hex())
-
+    // Respond with a success message
+    c.JSON(http.StatusOK, gin.H{"message": "User preferences updated successfully"})
 }
-
-
